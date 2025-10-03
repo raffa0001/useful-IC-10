@@ -1,0 +1,22 @@
+alias Sensor d0
+alias AngleVertical r0
+alias AngleHorizontal r1
+alias CorrectionAngle r2
+
+start:
+
+l AngleVertical Sensor Vertical
+sub AngleVertical 90 AngleVertical
+l AngleHorizontal Sensor Horizontal
+add AngleHorizontal AngleHorizontal CorrectionAngle
+
+sbn HASH("StructureSolarPanelReinforced") HASH("Solar 1") Vertical AngleVertical
+sbn HASH("StructureSolarPanelReinforced") HASH("Solar 1") Horizontal AngleHorizontal
+
+sub AngleVertical 180 AngleVertical
+
+sbn HASH("StructureSolarPanelReinforced") HASH("Solar 2") Vertical AngleVertical
+sbn HASH("StructureSolarPanelReinforced") HASH("Solar 2") Horizontal AngleHorizontal
+
+sleep 1
+j start

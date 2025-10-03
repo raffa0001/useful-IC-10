@@ -1,0 +1,21 @@
+
+alias generator d0
+alias battery d1
+define debug -815193061
+
+main:
+l r0 battery Charge
+blt r0 950000 poweron
+bgt r0 3500000 poweroff
+j end
+poweron:
+s generator On 1
+j end
+poweroff:
+s generator On 0
+j end
+end:
+ls r1 generator 0 Quantity
+sbn -815193061 HASH("coalcount") Setting r1
+sbn -815193061 HASH("debug") Setting r0
+j main

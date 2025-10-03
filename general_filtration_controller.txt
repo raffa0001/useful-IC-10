@@ -1,0 +1,127 @@
+define h2ofilter -1993197973
+define h2ofiltermedium 8804422
+define h2filter 15011598
+define h2filtermedium 1037507240
+define pollutantfilter 1915566057
+define pollutantfiltermedium 63677771
+define o2filter -721824748
+define o2filtermedium -1067319543
+define n2ofilter -1247674305
+define n2ofiltermedium 1824284061
+define n2filter 632853248
+define n2filtermedium -632657357
+define co2filter 1635000764
+define co2filtermedium 416897318
+
+alias 0check r2
+alias 1check r3
+alias occupiedslot0 r14
+alias occupiedslot1 r13
+
+main:
+#pressure check
+l r15 db PressureOutput
+bgt r15 3000 pressurecheck
+
+#reset filtration checks
+move 0check 0
+move 1check 0
+
+#check filter type and occupant
+ls occupiedslot0 db 0 Occupied
+breqz occupiedslot0 2
+ls r0 db 0 OccupantHash
+ls occupiedslot1 db 0 Occupied
+or r15 occupiedslot0 occupiedslot1
+beqz r15 main
+breqz occupiedslot1 2
+ls r1 db 1 OccupantHash
+filter0check:
+move 0check 1
+breqz occupiedslot0 8
+
+beq r0 h2ofilter h20
+beq r0 h2ofiltermedium h20
+beq r0 h2filter h2
+beq r0 h2filtermedium h2
+beq r0 pollutantfilter pollutant
+beq r0 pollutantfiltermedium pollutant
+beq r0 o2filter o2
+beq r0 o2filtermedium o2
+beq r0 n2ofilter n2o
+beq r0 n2ofiltermedium n2o
+beq r0 n2filter n2
+beq r0 n2filtermedium n2
+beq r0 co2filter co2
+beq r0 co2filtermedium co2
+filter1check:
+move 1check 1
+breqz occupiedslot1 main
+beq r1 h2ofilter h20
+beq r1 h2ofiltermedium h20
+beq r1 h2filter h2
+beq r1 h2filtermedium h2
+beq r1 pollutantfilter pollutant
+beq r1 pollutantfiltermedium pollutant
+beq r1 o2filter o2
+beq r1 o2filtermedium o2
+beq r1 n2ofilter n2o
+beq r1 n2ofiltermedium n2o
+beq r1 n2filter n2
+beq r1 n2filtermedium n2
+beq r1 co2filter co2
+beq r1 co2filtermedium co2
+h20:
+l r15 db RatioWaterInput
+seqz r15 r15
+seqz r15 r15
+s db Mode r15
+beq 1check 1 main
+beq 0check 1 filter1check
+h2:
+l r15 db RatioVolatilesInput
+seqz r15 r15
+seqz r15 r15
+s db Mode r15
+beq 1check 1 main
+beq 0check 1 filter1check
+pollutant:
+seqz r15 r15
+seqz r15 r15
+s db Mode r15
+beq 1check 1 main
+beq 0check 1 filter1check
+o2:
+l r15 db RatioOxygenInput
+sleep 3
+seqz r15 r15
+seqz r15 r15
+sleep 1
+s db Mode r15
+beq 1check 1 main
+beq 0check 1 filter1check
+n2o:
+l r15 db RatioNitrousOxideInput
+seqz r15 r15
+seqz r15 r15
+s db Mode r15
+beq 1check 1 main
+beq 0check 1 filter1check
+n2:
+l r15 db RatioNitrogenInput
+seqz r15 r15
+seqz r15 r15
+s db Mode r15
+beq 1check 1 main
+beq 0check 1 filter1check
+co2:
+l r15 db RatioCarbonDioxideInput
+seqz r15 r15
+seqz r15 r15
+s db Mode r15
+beq 1check 1 main
+beq 0check 1 filter1check
+#pressurcheck loop
+pressurecheck:
+s db Mode 0
+j main

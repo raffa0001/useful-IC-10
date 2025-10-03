@@ -1,0 +1,70 @@
+alias temperature r0
+alias pressure r1
+alias airclean r2
+alias heat r3
+alias cool r4
+alias occupied r1
+
+define occupiedsensor 322782515
+define lights 797794350
+define lights2 1847265835
+define lights3 555215790
+define hall HASH("lighthall")
+define proximitysensor 568800213
+define dormitory HASH("lightdormitory")
+
+sbn HASH("StructureVolumePump") HASH("pumpoutlet") Setting 10
+sbn HASH("StructureVolumePump") HASH("pumpfill") Setting 10.0
+main:
+#lights hall
+lb occupied occupiedsensor Quantity 3
+sge occupied occupied 1
+sbn lights hall On occupied
+sbn lights2 hall On occupied
+sbn lights3 hall On occupied
+#light dormitory
+lbn occupied proximitysensor HASH("sensordormitory") Activate 3
+sbn lights2 dormitory On occupied
+sbn 1514476632 dormitory On occupied
+#music
+lbn r15 HASH("StructureLogicSwitch2") HASH("musicswitch") Open r15
+sbn HASH("StructureKlaxon") HASH("musicklaxon") On r15
+sbn HASH("StructureKlaxon") HASH("musicklaxon") Volume 15
+
+sbn HASH("StructureActiveVent") HASH("airinlet") Mode 0
+sbn HASH("StructureActiveVent") HASH("airoutlet") Mode 1
+sbn HASH("StructureActiveVent") HASH("airinlet") PressureExternal 101
+sbn HASH("StructureActiveVent") HASH("airoutlet") PressureExternal 90
+sbn HASH("StructureActiveVent") HASH("airoutlet") PressureInternal 3000
+
+lbn temperature HASH("StructureGasSensor") HASH("gassensor") Temperature 3
+sgt cool temperature 300
+slt heat temperature 288
+lbn airclean HASH("StructureGasSensor") HASH("gassensor") RatioVolatiles 3
+bgt airclean 0 circulate
+lbn airclean HASH("StructureGasSensor") HASH("gassensor") RatioPollutant 3
+bgt airclean 0 circulate
+lbn airclean HASH("StructureGasSensor") HASH("gassensor") RatioCarbonDioxide 3
+bgt airclean 3 circulate
+lbn airclean HASH("StructureGasSensor") HASH("gassensor") RatioNitrogen 3
+bgt airclean 80 circulate
+lbn airclean HASH("StructureGasSensor") HASH("gassensor") RatioOxygen 3
+bgt airclean 20 circulate
+
+bgt pressure 110 stop
+blt pressure 85 stop
+
+circulate:
+sbn HASH("StructureActiveVent") HASH("airinlet") On 1
+sbn HASH("StructureActiveVent") HASH("airoutlet") On 1
+sbn HASH("StructureVolumePump") HASH("pumpoutlet") On 1
+sbn HASH("StructureWallCooler") HASH("cooler") On cool
+sbn HASH("StructureWallHeater") HASH("heater") On heat
+j main
+stop:
+sbn HASH("StructureActiveVent") HASH("airoutlet") On 0
+sbn HASH("StructureActiveVent") HASH("airinlet") On 0
+sbn HASH("StructureVolumePump") HASH("pumpoutlet") On 0
+sbn HASH("StructureWallCooler") HASH("cooler") On cool
+sbn HASH("StructureWallHeater") HASH("heater") On heat
+j main

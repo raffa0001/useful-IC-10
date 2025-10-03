@@ -1,0 +1,16 @@
+define filter -348054045
+define pump -321403609
+
+main:
+sleep 3
+lbn r0 filter HASH("filtero2") Mode 3
+sbn pump HASH("pumpo2") On r0
+lbn r0 filter HASH("filtern2") Mode 3
+sbn pump HASH("pumpn2") On r0
+lbn r0 filter HASH("filterco2") Mode 3
+sbn pump HASH("pumpco2") On r0
+lbn r0 filter HASH("filtervol") Mode 3
+sbn pump HASH("pumpvol") On r0
+lbn r0 filter HASH("filterpol") Mode 3
+sbn pump HASH("pumppol") On r0
+j main

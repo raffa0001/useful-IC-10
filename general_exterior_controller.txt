@@ -1,0 +1,69 @@
+define autolathe 336213101
+define pipebender -1888248335
+define electronicsprinter 1307165496
+define toolmanufactory -465741100
+define stacker 1585641623
+alias exported r0
+alias countlathe r1
+alias countbender r2
+alias counttool r3
+alias countelectro r4
+alias active r5
+
+sb autolathe ClearMemory 1
+sb pipebender ClearMemory 1
+sb electronicsprinter ClearMemory 1
+sb toolmanufactory ClearMemory 1
+lathe:
+#checks for exterior lights
+lbn r15 HASH("StructureDaylightSensor") HASH("lightssensor") Activate 1
+seqz r15 r15
+s db Setting r15
+sbn HASH("StructureLightLongAngled") HASH("exteriorlight") On r15
+sbn HASH("StructureLightRoundAngled") HASH("exteriorlight") On r15
+
+#checks for storms and alarms
+lbn r15 HASH("StructureLogicDial") HASH("weatherdial") Setting 1
+sbn HASH("StructureKlaxon") HASH("weatherklaxon") Mode r15
+lbn  r15 HASH("StructureWeatherStation") HASH("weatherscan") Mode 1
+seq r15 r15 1
+sbn HASH("StructureKlaxon") HASH("weatherklaxon") On r15
+
+#actual lathe check
+lb active autolathe Activate Minimum
+beqz active clearauto
+lbn countlathe stacker HASH("stackerlathe") Setting Minimum
+lb exported autolathe ExportCount Maximum
+blt exported countlathe bender
+sb autolathe Activate 0
+clearauto:
+sb autolathe ClearMemory 1
+bender:
+lb active pipebender Activate Minimum
+yield
+beqz active clearbend
+lbn countbender stacker HASH("stackerbender") Setting Minimum
+lb exported pipebender ExportCount Maximum
+blt exported countbender electro
+sb pipebender Activate 0
+clearbend:
+sb pipebender ClearMemory 1
+electro:
+lb active electronicsprinter Activate Minimum
+beqz active clearelectro
+lbn countelectro stacker HASH("stackerelectro") Setting Minimum
+lb exported electronicsprinter ExportCount Maximum
+blt exported countelectro tool
+sb electronicsprinter Activate 0
+clearelectro:
+sb electronicsprinter ClearMemory 1
+tool:
+lb active toolmanufactory Activate Minimum
+beqz active cleartool
+lbn counttool stacker HASH("stackertool") Setting Minimum
+lb exported toolmanufactory ExportCount Maximum
+blt exported counttool lathe
+sb toolmanufactory Activate 0
+cleartool:
+sb toolmanufactory ClearMemory 1
+j lathe

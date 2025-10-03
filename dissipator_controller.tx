@@ -1,0 +1,35 @@
+alias tempinternal r0
+alias tempexternal r1
+alias pressureinternal r2
+define vents -1129453144
+define gassensors -1252983604
+
+sbn vents HASH("ventcoolin") PressureInternal 220
+sbn vents HASH("ventcoolin") On 0
+sbn vents HASH("ventcoolin") Mode 1
+sbn vents HASH("ventcoolout") On 0
+sbn vents HASH("ventcoolout") Mode 0
+main:
+
+lbn tempinternal gassensors HASH("chambersensor") Temperature 1
+lbn tempexternal gassensors HASH("externalsensor") Temperature 1
+lbn tempexternal gassensors HASH("chambersensor") Pressure 1
+ble pressureinternal 150 pressurize
+bge pressureinternal 240 depressurize
+bge tempinternal tempexternal on#jump if it's too hot inside
+off:
+sbn vents HASH("ventcoolin") On 0
+sbn vents HASH("ventcoolout") On 0
+j main
+on:
+sbn vents HASH("ventcoolin") On 1
+sbn vents HASH("ventcoolout") On 1
+j main
+pressurize:
+sbn vents HASH("ventcoolin") On 1
+sbn vents HASH("ventcoolout") On 0
+j main
+depressurize:
+sbn vents HASH("ventcoolin") On 0
+sbn vents HASH("ventcoolout") On 1
+j main

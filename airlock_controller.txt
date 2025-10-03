@@ -1,0 +1,102 @@
+alias hashA r1
+alias hashB r2
+alias pressureA r3
+alias pressureB r4
+alias slotA r5
+alias slotB r6
+alias temperatureA r7
+alias temperatureB r8
+alias memory r15
+
+main:
+sbn HASH("StructurePipeHeater") HASH("heatfill") On 0
+sbn HASH("StructureVolumePump") HASH("pumpfill") On 0
+move hashA 0
+move hashA 0
+#tankfill manager
+lbns slotA HASH("StructureGasTankStorage") HASH("tankfillA") 0 Occupied 1
+breq slotA 0 2
+lbns hashA HASH("StructureGasTankStorage") HASH("tankfillA") 0 OccupantHash 1
+
+lbns slotB HASH("StructureGasTankStorage") HASH("tankfillB") 0 Occupied 1
+breq slotB 0 2
+lbns hashB HASH("StructureGasTankStorage") HASH("tankfillB") 0 OccupantHash 1
+
+lbn pressureA HASH("StructureGasTankStorage") HASH("tankfillA") Pressure 1
+lbn pressureB HASH("StructureGasTankStorage") HASH("tankfillB") Pressure 1
+
+add r15 slotA slotB
+beqz r15 main
+
+lbn temperatureA HASH("StructureGasTankStorage") HASH("tankfillA") Temperature 1
+lbn temperatureB HASH("StructureGasTankStorage") HASH("tankfillB") Temperature 1
+s db Setting temperatureA
+blt temperatureA 288 heatloop
+blt temperatureB 288 heatloop
+next:
+
+
+
+beq hashA 42280099 fill5000
+beq hashB 42280099 fill5000
+
+beq hashA -668314371 fill15000
+beq hashB -668314371 fill15000
+
+beq hashA 998653377 fill20000
+beq hashB 998653377 fill20000
+
+j off
+fill5000:
+lbns slotA HASH("StructureGasTankStorage") HASH("tankfillA") 0 Occupied 1
+lbns slotB HASH("StructureGasTankStorage") HASH("tankfillB") 0 Occupied 1
+lbn pressureA HASH("StructureGasTankStorage") HASH("tankfillA") Pressure 1
+lbn pressureB HASH("StructureGasTankStorage") HASH("tankfillB") Pressure 1
+breqz slotA 2
+bgt pressureA 5000 off
+breqz slotB 2
+bgt pressureB 5000 off
+or r15 slotA slotB
+breqz r15 main
+sbn HASH("StructureVolumePump") HASH("pumpfill") On 1
+j fill5000
+fill15000:
+lbns slotA HASH("StructureGasTankStorage") HASH("tankfillA") 0 Occupied 1
+lbns slotB HASH("StructureGasTankStorage") HASH("tankfillB") 0 Occupied 1
+lbn pressureA HASH("StructureGasTankStorage") HASH("tankfillA") Pressure 1
+lbn pressureB HASH("StructureGasTankStorage") HASH("tankfillB") Pressure 1
+breqz slotA 2
+bgt pressureA 15000 off
+breqz slotB 2
+bgt pressureB 15000 off
+sbn HASH("StructureVolumePump") HASH("pumpfill") On 1
+j fill15000
+fill20000:
+lbns slotA HASH("StructureGasTankStorage") HASH("tankfillA") 0 Occupied 1
+lbns slotB HASH("StructureGasTankStorage") HASH("tankfillB") 0 Occupied 1
+lbn pressureA HASH("StructureGasTankStorage") HASH("tankfillA") Pressure 1
+lbn pressureB HASH("StructureGasTankStorage") HASH("tankfillB") Pressure 1
+breqz slotA 2
+bgt pressureA 20000 off
+breqz slotB 2
+bgt pressureB 20000 off
+sbn HASH("StructureVolumePump") HASH("pumpfill") On 1
+j fill20000
+off:
+sbn HASH("StructureVolumePump") HASH("pumpfill") On 0
+j main
+
+heatloop:
+lbns slotA HASH("StructureGasTankStorage") HASH("tankfillA") 0 Occupied 1
+lbns slotB HASH("StructureGasTankStorage") HASH("tankfillB") 0 Occupied 1
+or r15 slotA slotB
+beqz r15 main
+breqz slotA 2
+lbn temperatureA HASH("StructureGasTankStorage") HASH("tankfillA") Temperature 1
+breqz slotB 2
+lbn temperatureB HASH("StructureGasTankStorage") HASH("tankfillB") Temperature 1
+s db Setting temperatureA
+bgt temperatureA 288 next
+bgt temperatureB 288 next
+sbn HASH("StructurePipeHeater") HASH("heatfill") On 1
+j heatloop

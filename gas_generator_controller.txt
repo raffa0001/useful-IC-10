@@ -1,0 +1,120 @@
+alias pressure r0
+alias temperature r1
+alias dirtyair r2
+alias enable r3
+alias mem1 r14
+alias mem2 r15
+
+sbn -1129453144 HASH("enginedrain") Mode 1
+sbn -1129453144 HASH("enginedrain") PressureInternal 50000
+sbn -1129453144 HASH("enginedrain") PressureExternal 0
+sbn -1129453144 HASH("enginecool") Mode 0
+sbn -1129453144 HASH("enginecool") PressureInternal 0
+sbn -1129453144 HASH("enginecool") PressureExternal 30
+sbn -1129453144 HASH("enginecooldrain") Mode 1
+sbn -1129453144 HASH("enginecooldrain") PressureExternal 0
+sbn -1129453144 HASH("enginecooldrain") PressureInternal 50000
+
+main:
+#turn stuff off
+sbn -1129453144 HASH("enginedrain") On 0
+sbn -1129453144 HASH("enginecool") On 0
+sbn -1129453144 HASH("enginecooldrain") On 0
+sbn HASH("StructureVolumePump") HASH("enginecoolpump") On 0
+sbn HASH("StructureGasGenerator") HASH("engine") On 0
+sbn HASH("StructureBlastDoor") HASH("engineblast") Open 0
+#checks
+lbn enable 1220484876 HASH("leverengine") Open 1
+seqz enable enable
+#clean air check
+lbn dirtyair -1252983604 HASH("enginesensor") RatioPollutant  1
+seqz dirtyair dirtyair
+beqz dirtyair draindirty
+lbn dirtyair -1252983604 HASH("enginesensor") RatioCarbonDioxide 1
+seqz dirtyair dirtyair
+beqz  dirtyair draindirty
+lbn dirtyair -1252983604 HASH("enginesensor") RatioVolatiles 1
+seqz dirtyair dirtyair
+beqz dirtyair draindirty
+
+beqz enable disabled
+#start engine if enable = 1 (lever down)
+enabled:
+#stabilize pressure with cold N2 when air is clean loop
+lbn enable 1220484876 HASH("leverengine") Open 1
+seqz enable enable
+beqz enable disabled
+sbn HASH("StructureBlastDoor") HASH("engineblast") Open 0
+sleep 3
+lbn pressure -1252983604 HASH("enginesensor") Pressure 1
+slt r15 pressure 26
+sbn -1129453144 HASH("enginecool") On r15
+bge pressure 26 heat
+j enabled
+#heat coolant to functional temperature loop
+heat:
+sbn -1129453144 HASH("enginecooldrain") On 0
+sbn -321403609 HASH("enginecoolpump") On 0
+sbn -1129453144 HASH("enginecool") On 0
+lbn enable 1220484876 HASH("leverengine") Open 1
+seqz enable enable
+beqz enable disabled
+lbn temperature -1252983604 HASH("enginesensor") Temperature 1
+sbn -815193061 HASH("enginedebug") Setting temperature
+sle r15 temperature 284
+sbn HASH("StructureWallHeater") HASH("engineheat") On r15
+ble temperature 284 heat
+j run
+cool:
+lbn enable 1220484876 HASH("leverengine") Open 1
+seqz enable enable
+beqz enable disabled
+lbn temperature -1252983604 HASH("enginesensor") Temperature 1
+sbn -815193061 HASH("enginedebug") Setting temperature
+sge r15 temperature 304
+sbn -1129453144 HASH("enginecooldrain") On r15
+sbn -321403609 HASH("enginecoolpump") On r15
+sbn -1129453144 HASH("enginecool") On r15
+#engine and coolant (will likely need to tweak numbers)
+run:
+lbn enable 1220484876 HASH("leverengine") Open 1
+seqz enable enable
+beqz enable disabled
+sbn HASH("StructureGasGenerator") HASH("engine") On 1
+#same heat check loop from before
+lbn temperature -1252983604 HASH("enginesensor") Temperature 1
+sbn -815193061 HASH("enginedebug") Setting temperature
+bge temperature 323 disabled
+bge temperature 304 cool
+ble temperature 284 heat
+j run
+
+#stop engine and open door if nothing is happening and enable = 0 (lever pulled)
+disabled:
+lbn r15 -1252983604 HASH("enginesensor") RatioNitrogen 1
+seqz r15 r15
+seqz r15 r15
+sbn -1129453144 HASH("enginecool") On 0
+sbn -1129453144 HASH("enginecooldrain") On r15
+sbn -321403609 HASH("enginecoolpump") On r15
+beq r15 1 disabled
+sbn -1129453144 HASH("enginecooldrain") On 0
+sbn -321403609 HASH("enginecoolpump") On 0
+sleep 3
+sbn HASH("StructureBlastDoor") HASH("engineblast") Open 1
+j idle
+
+idle:
+lbn enable 1220484876 HASH("leverengine") Open 1
+seqz enable enable
+beqz enable idle
+j main
+
+#drain
+draindirty:
+sbn HASH("StructureBlastDoor") HASH("engineblast") Open 0
+sleep 3
+sbn -1129453144 HASH("enginedrain") On 1
+lbn pressure -1252983604 HASH("enginesensor") Pressure 1
+ble pressure 0 main
+j draindirty
