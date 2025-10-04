@@ -17,7 +17,7 @@ j main
 poweroff:
 sbn HASH("StructureLogicSwitch") HASH("leverengine") Open 1
 sbn HASH("StructurePressureRegulator") HASH("engineregulator") On 0
-j maindefine battery -400115994
+j main
 define led -815193061
 
 sb battery On 1
