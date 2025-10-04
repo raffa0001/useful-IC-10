@@ -10,18 +10,20 @@ sbn vents HASH("ventcoolin") Mode 1
 sbn vents HASH("ventcoolout") On 0
 sbn vents HASH("ventcoolout") Mode 0
 main:
-
-lbn tempinternal gassensors HASH("chambersensor") Temperature 1
-lbn tempexternal gassensors HASH("externalsensor") Temperature 1
-lbn tempexternal gassensors HASH("chambersensor") Pressure 1
+s db Setting tempexternal
+lbn tempinternal gassensors HASH("chambersensor") Temperature 3
+lbn tempexternal gassensors HASH("externalsensor") Temperature 3
+lbn pressureinternal gassensors HASH("chambersensor") Pressure 3
 ble pressureinternal 150 pressurize
 bge pressureinternal 240 depressurize
 bge tempinternal tempexternal on#jump if it's too hot inside
 off:
+s db Setting 97
 sbn vents HASH("ventcoolin") On 0
 sbn vents HASH("ventcoolout") On 0
 j main
 on:
+s db Setting 98
 sbn vents HASH("ventcoolin") On 1
 sbn vents HASH("ventcoolout") On 1
 j main
@@ -30,6 +32,7 @@ sbn vents HASH("ventcoolin") On 1
 sbn vents HASH("ventcoolout") On 0
 j main
 depressurize:
+s db Setting 99
 sbn vents HASH("ventcoolin") On 0
 sbn vents HASH("ventcoolout") On 1
 j main
