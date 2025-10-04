@@ -18,22 +18,3 @@ poweroff:
 sbn HASH("StructureLogicSwitch") HASH("leverengine") Open 1
 sbn HASH("StructurePressureRegulator") HASH("engineregulator") On 0
 j main
-define led -815193061
-
-sb battery On 1
-sbn HASH("StructurePressureRegulator") HASH("engineregulator") Setting 70
-main:
-lbn r15 HASH("StructureGasSensor") HASH("enginesensor") Pressure 1
-sbn led HASH("enginedebugpressure") Setting r15
-lb r0 battery  Charge 2
-blt r0 950000 poweron
-bgt r0 3500000 poweroff
-j main
-poweron:
-sbn HASH("StructureLogicSwitch") HASH("leverengine") Open 0
-sbn HASH("StructurePressureRegulator") HASH("engineregulator") On 1
-j main
-poweroff:
-sbn HASH("StructureLogicSwitch") HASH("leverengine") Open 1
-sbn HASH("StructurePressureRegulator") HASH("engineregulator") On 0
-j main
