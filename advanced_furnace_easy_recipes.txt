@@ -1,0 +1,123 @@
+define furnaces 545937711
+define furnace HASH("furnace")
+define dials 554524804
+define dialfurnace HASH("dialfurnace")
+define buttons 491845673
+define furnacebutton HASH("furnacebutton")
+define ichousings1 -128473777
+define ichousings2 2037291645
+define furnaceic HASH("furnaceic")
+alias number r0
+alias selection r1
+alias selected r2
+alias mintemp r3
+alias maxpres r4
+alias minpres r5
+alias maxtemp r6
+sbn dials dialfurnace Mode 10
+main:
+sbn HASH("StructureChuteDigitalValveLeft") HASH("valvefurnace") Setting 999
+sbn HASH("StructureChuteDigitalValveLeft") HASH("valvefurnace") Open 1
+sbn HASH("StructureChuteDigitalValveLeft") HASH("valvefurnace") Quantity 0
+yield
+lbn number dials dialfurnace Setting 3
+move selected -744098481 #selectmode off
+beq number 0 offline
+sbn ichousings1 furnaceic On 0
+sbn ichousings2 furnaceic On 0
+move selected -654790771 #steel
+move maxpres 1500
+move mintemp 950
+move minpres 1050
+move maxtemp 100000
+beq number 1 display
+move selected -297990285 #invar
+move maxpres 19000
+move mintemp 1250
+move minpres 18000
+move maxtemp 1500
+beq number 2 display
+move selected 502280180 #electrum
+move maxpres 1500
+move mintemp 850
+move minpres 800
+move maxtemp 100000
+beq number 3 display
+move selected 1058547521 #constantan
+move maxpres 21000
+move mintemp 1020
+move minpres 20000
+move maxtemp 100000
+beq number 4 display
+move selected 412924554 #astroloy
+move maxpres 33000
+move mintemp 1050
+move minpres 30000
+move maxtemp 100000
+beq number 5 display
+move selected -787796599 #inconel
+move minpres 23550
+move mintemp 600
+move minpres 24000
+move maxtemp 100000
+beq number 6 display
+yield
+bge number 7 main
+j main
+display:
+yield
+lbn r14 dials dialfurnace Setting 3
+bne r14 number main
+s db Setting selected
+lbn r14 buttons furnacebutton Activate 3
+breq r14 1 2
+j display
+check:
+sbn furnaces furnace SettingOutput 0
+sbn furnaces furnace SettingInput 0
+yield
+smelt:
+yield
+lbn r15 furnaces furnace Temperature 3
+lbn r14 furnaces furnace Pressure 3
+bgt r14 maxpres vent
+blt r14 minpres burn
+blt r15 mintemp burn
+bgt r15 maxtemp cool
+sbn furnaces furnace Open 1
+j eject
+burn:
+yield
+lbn r15 furnaces furnace Temperature 3
+lbn r14 furnaces furnace Pressure 3
+bgt r14 maxpres check
+bgt r15 mintemp check
+sbn furnaces furnace SettingInput 5
+sbn furnaces furnace Activate 1
+j burn
+vent:
+yield
+lbn r14 furnaces furnace Pressure 3
+blt r14 maxpres check
+sbn furnaces furnace SettingOutput 100
+j vent
+cool:
+lbn r15 furnaces furnace Temperature 3
+lbn r14 furnaces furnace Pressure 3
+blt r15 maxtemp check
+blt r14 minpres check
+j cool
+eject:
+yield
+lbn r15 furnaces furnace Reagents 3
+bne r15 0 eject
+sbn furnaces furnace Open 0
+j main
+
+offline:
+lbn r14 dials dialfurnace Setting 3
+bne r14 number main
+s db Setting selected
+sbn ichousings1 furnaceic On 1
+sbn ichousings2 furnaceic On 1
+j offline

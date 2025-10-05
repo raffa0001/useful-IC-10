@@ -1,0 +1,128 @@
+define furnaces 545937711
+define furnace HASH("furnace")
+define valves HASH("StructureChuteDigitalValveLeft")
+define valvefurnace HASH("valvefurnace")
+define iron 1758427767
+define copper -707307845
+define gold -1348105509
+define silver -916518678
+define nickel 1830218956
+define lead -190236170
+alias ready r0
+alias occupant r1
+alias temp r2
+alias pres r3
+alias maxpres r4
+alias mintemp r5
+main:
+sbn valves valvefurnace Open 0
+sbn valves valvefurnace Setting 1
+move occupant 0
+yield
+lbns ready valves valvefurnace 0 Occupied 3
+breqz ready 3
+lbns occupant valves valvefurnace 0 OccupantHash 3
+sbn valves valvefurnace Open 1
+beqz ready main
+check:
+sbn furnaces furnace SettingOutput 0
+sbn furnaces furnace SettingInput 0
+sleep 2
+beq occupant iron smiron
+beq occupant copper smcopper
+beq occupant gold smgold
+beq occupant silver smsilver
+beq occupant nickel smnickel
+beq occupant lead smlead
+beq occupant 1103972403 smsilicon
+j main
+smiron:
+yield
+lbn temp furnaces furnace Temperature 3
+lbn pres furnaces furnace Pressure 3
+move maxpres 1500
+move mintemp 850
+bgt pres maxpres vent
+blt temp mintemp burn
+sbn furnaces furnace Open 1
+j eject
+smcopper:
+yield
+lbn temp furnaces furnace Temperature 3
+lbn pres furnaces furnace Pressure 3
+move maxpres 1500
+move mintemp 650
+bgt pres maxpres vent
+blt temp mintemp burn
+sbn furnaces furnace Open 1
+j main
+smgold:
+yield
+lbn temp furnaces furnace Temperature 3
+lbn pres furnaces furnace Pressure 3
+move maxpres 1500
+move mintemp 650
+bgt pres maxpres vent
+blt temp mintemp burn
+sbn furnaces furnace Open 1
+j eject
+smsilver:
+yield
+lbn temp furnaces furnace Temperature 3
+lbn pres furnaces furnace Pressure 3
+move maxpres 1500
+move mintemp 650
+s db Setting 11
+bgt pres maxpres vent
+blt temp mintemp burn
+sbn furnaces furnace Open 1
+j eject
+smnickel:
+yield
+yield
+lbn temp furnaces furnace Temperature 3
+lbn pres furnaces furnace Pressure 3
+move maxpres 1500
+move mintemp 850
+bgt pres maxpres vent
+blt temp mintemp burn
+sbn furnaces furnace Open 1
+j eject
+smlead:
+yield
+lbn temp furnaces furnace Temperature 3
+lbn pres furnaces furnace Pressure 3
+move maxpres 1500
+move mintemp 450
+bgt pres maxpres vent
+blt temp mintemp burn
+sbn furnaces furnace Open 1
+j eject
+smsilicon:
+yield
+lbn temp furnaces furnace Temperature 3
+lbn pres furnaces furnace Pressure 3
+move maxpres 1500
+move mintemp 920
+bgt pres maxpres vent
+blt temp mintemp burn
+sbn furnaces furnace Open 1
+j eject
+burn:
+s db Setting 12
+lbn temp furnaces furnace Temperature 3
+bgt temp mintemp check
+sbn furnaces furnace SettingInput 1
+sbn furnaces furnace Activate 1
+j burn
+vent:
+s db Setting 13
+lbn pres furnaces furnace Pressure 3
+blt pres maxpres check
+sbn furnaces furnace SettingOutput 100
+j vent
+eject:
+lbn r15 furnaces furnace Reagents 3
+bne r15 0 eject
+sbn furnaces furnace Open 0
+j main

@@ -1,0 +1,128 @@
+define furnaces 545937711
+define furnace HASH("furnace")
+define dials 554524804
+define dialfurnace HASH("dialfurnace")
+define buttons 491845673
+define furnacebutton HASH("furnacebutton")
+alias number r0
+alias selection r1
+alias selected r2
+alias mintemp r3
+alias maxpres r4
+alias minpres r5
+alias maxtemp r6
+sbn dials dialfurnace Mode 10
+main:
+lbn number dials dialfurnace Setting 3
+move selected -744098481 #selectmode off
+blt number 7 offline
+move selected -82508479 #solder
+move maxpres 1500
+move mintemp 400
+move minpres 1050
+move maxtemp 550
+beq number 7 display
+move selected 156348098 #waspaloy
+move maxpres 53000
+move mintemp 420
+move minpres 50100
+move maxtemp 800
+beq number 8 display
+move selected -1897868623 #stellite
+move maxpres 15000
+move mintemp 1820
+move minpres 10050
+move maxtemp 100000
+beq number 9 display
+move selected 1579842814 #hastelloy
+move maxpres 27000
+move mintemp 960
+move minpres 25100
+move maxtemp 1000
+beq number 10 display
+j main
+display:
+yield
+lbn r14 dials dialfurnace Setting 3
+bne r14 number main
+sbn -128473777 HASH("ic-hash") Setting selected
+lbn r14 buttons furnacebutton Activate 3
+breq r14 1 2
+j display
+check:
+sbn furnaces furnace SettingOutput 0
+sbn furnaces furnace SettingInput 0
+sbn HASH("StructureDigitalValve") HASH("fuelvalve") On 0
+sbn HASH("StructureDigitalValve") HASH("nitrogenvalve") On 0
+yield
+smelt:
+lbn r15 furnaces furnace Temperature 3
+lbn r14 furnaces furnace Pressure 3
+sgt r13 r14 maxpres
+slt r10 r15 mintemp
+sgt r9 r15 maxtemp
+blt r14 minpres inject
+bnez r13 vent
+bnez r10 inject
+bnez r9 wait
+sleep 2
+sbn furnaces furnace Open 1
+j eject
+inject:
+yield
+lbn r15 furnaces furnace Temperature 3
+lbn r14 furnaces furnace Pressure 3
+sgt r12 r15 maxtemp
+slt r11 r14 minpres
+beq r11 r12 pressurant
+j fuel
+fuel:
+sbn HASH("StructureDigitalValve") HASH("nitrogenvalve") On 0
+sbn furnaces furnace SettingInput 10
+sbn furnaces furnace Activate 1
+lbn r15 furnaces furnace Temperature 3
+lbn r14 furnaces furnace Pressure 3
+sub r13 minpres r14
+yield
+sbn HASH("StructureDigitalValve") HASH("fuelvalve") On 1
+bgt r14 maxpres check
+bgt r15 mintemp check
+blt r13 5000 pressurant
+j fuel
+pressurant:
+sbn HASH("StructureDigitalValve") HASH("fuelvalve") On 0
+sbn furnaces furnace SettingInput 30
+lbn r15 furnaces furnace Temperature 3
+lbn r14 furnaces furnace Pressure 3
+yield
+sbn HASH("StructureDigitalValve") HASH("nitrogenvalve") On 1
+bgt r14 maxpres check
+blt r15 maxtemp check
+bgt r15 mintemp check
+sub r13 minpres r14
+bgt r13 5000 fuel
+j pressurant
+vent:
+yield
+lbn r14 furnaces furnace Pressure 3
+blt r14 maxpres check
+sbn furnaces furnace SettingOutput 50
+j vent
+wait:
+lbn r15 furnaces furnace Temperature 3
+lbn r14 furnaces furnace Pressure 3
+blt r14 minpres check
+blt r15 maxtemp check
+blt r14 maxpres check
+j wait
+eject:
+lbn r15 furnaces furnace Reagents 3
+bne r15 0 eject
+sbn furnaces furnace Open 0
+j main
+offline:
+yield
+lbn r14 dials dialfurnace Setting 3
+bge r14 7 main
+sbn HASH("StructureDigitalValve") HASH("fuelvalve") On 1
+j offline
