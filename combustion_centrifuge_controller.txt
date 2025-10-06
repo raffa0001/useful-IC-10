@@ -5,49 +5,51 @@ alias throttle r4
 alias limiter r5
 alias memrpm r6
 alias valid r7
+define centrifuges 1238905683
+define centrifuge HASH("centrifuge")
 
-s d0 CombustionLimiter 100
+sbn centrifuges centrifuge CombustionLimiter 100
 main:
 move throttle 0
-ls full d0 0 Occupied
+lbns full centrifuges centrifuge 0 Occupied 3
 beqz full idle1
-ls valid d0 0 OccupantHash
+lbns valid centrifuges centrifuge 0 OccupantHash 3
 beq valid -1234745580 start
 beq valid 2131916219 start
 beq valid -1641500434 start
 j invalid
 start:
-l throttle d0 Throttle
+lbn throttle centrifuges centrifuge Throttle 3
 add throttle throttle 10
-s d0 Throttle throttle
+sbn centrifuges centrifuge Throttle throttle
 sleep 5
 waitstart:
-l stress d0 Stress
-ls full d0 0 Occupied
+lbn stress centrifuges centrifuge Stress 3
+lbns full centrifuges centrifuge 0 Occupied 3
 bnez stress waitstart
 beqz full stop
 j start
 
 stop:
-s d0 Throttle 0
-s d0 On 0
-l stress d0 Stress
-l rpm d0 Rpm
+sbn centrifuges centrifuge Throttle 0
+sbn centrifuges centrifuge On 0
+lbn stress centrifuges centrifuge Stress 3
+lbn rpm centrifuges centrifuge Rpm 3
 beqz rpm idle1
 bnez stress stop
 j stop
 
 idle1:
-s d0 On 1
-l full d0 Reagents
-s d0 Open 1
+sbn centrifuges centrifuge On 1
+lbn full centrifuges centrifuge Reagents 3
+sbn centrifuges centrifuge Open 1
 bnez full idle1
 idle2:
-s d0 Open 0
-ls full d0 0 Occupied
+sbn centrifuges centrifuge Open 0
+lbns full centrifuges centrifuge 0 Occupied 3
 bnez full main
 j idle2
 invalid:
-ls full d0 0 Occupied
+lbns full centrifuges centrifuge 0 Occupied 3
 bnez full invalid
 j main
