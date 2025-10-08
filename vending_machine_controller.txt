@@ -1,0 +1,59 @@
+define vendings 19591354
+define vending HASH("vending")
+define iron -1301215609
+define silicon -290196476
+define copper -404336834
+define valves -1337091041 #right
+#define valves 648608238 #left
+define siliconvalve HASH("siliconvalve")
+define coppervalve HASH("coppervalve")
+define ironvalve HASH("ironvalve")
+alias hashmem r0
+alias number r1
+alias ironmem r2
+alias coppermem r3
+alias siliconmem r4
+alias mem r5
+
+sbn valves ironvalve On 1
+sbn valves coppervalve On 1
+sbn valves siliconvalve On 1
+sbn valves ironvalve Open 0
+sbn valves coppervalve Open 0
+sbn valves siliconvalve Open 0
+sbn valves siliconvalve Setting 1
+sbn valves ironvalve Setting 1
+sbn valves coppervalve Setting 1
+
+main:
+move sp 1
+move number 2
+start:
+yield
+lbns r0 vendings vending number OccupantHash 3
+push r0
+add number number 1
+blt number 5 start
+move number 0
+check:
+pop r0
+seq mem r0 iron
+breq ironmem 1 2
+or ironmem mem 0
+seq mem r0 copper
+breq coppermem 1 2
+or coppermem mem 0
+seq mem r0 silicon
+breq siliconmem 1 2
+or siliconmem mem 0
+add number number 1
+blt number 3 check
+confirm:
+seqz ironmem ironmem
+seqz coppermem coppermem
+seqz siliconmem siliconmem
+sbn valves ironvalve Open ironmem
+sbn valves coppervalve Open coppermem
+sbn valves siliconvalve Open siliconmem
+sleep 5
+j main
